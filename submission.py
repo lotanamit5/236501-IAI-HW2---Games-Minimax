@@ -20,6 +20,34 @@ def utility(env: WarehouseEnv, taxi_id: int):
     return None
 
 
+def smart_heuristic2(env: WarehouseEnv, agent_id: int):
+    total_score = 0
+
+    robot = env.get_robot(agent_id)
+
+    if robot.battery == 0:
+        total_score -= 100  # Penalize robots with no battery
+    else:
+        total_score += 10 * robot.battery  # Reward higher battery levels
+
+    total_score += 5 * robot.credit  # Reward higher credit levels
+
+    if robot.package is None:
+        available_packages = [p for p in env.packages if p.on_board]
+        packages_by_trip = sorted(available_packages,
+                                  key=lambda p:
+                                  manhattan_distance(robot.position, p.position) + manhattan_distance(p.position,
+                                                                                                      p.destination))
+        best_package = packages_by_trip[0]
+
+        total_score -= manhattan_distance(robot.position, best_package.position)
+
+    else:
+        total_score -= manhattan_distance(robot.position, robot.package.destination)
+
+    return total_score
+
+
 def smart_heuristic(env: WarehouseEnv, taxi_id: int):
     agent = env.get_robot(taxi_id)
 
@@ -37,7 +65,7 @@ def smart_heuristic(env: WarehouseEnv, taxi_id: int):
 
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
-        return smart_heuristic(env, robot_id)
+        return smart_heuristic2(env, robot_id) - smart_heuristic2(env, (robot_id + 1) % 2)
 
 
 class AgentMinimax(Agent):
@@ -55,7 +83,7 @@ class AgentMinimax(Agent):
         if env.done():
             return utility(env, agent_id)
 
-        return smart_heuristic(env, agent_id)
+        return smart_heuristic2(env, agent_id)
 
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
         self.start_time = time.time()
@@ -72,7 +100,7 @@ class AgentMinimax(Agent):
                 other_id = (agent_id + 1) % 2
                 children_heuristics = [self.RB_Minimax(child, agent_id, D, turn=other_id) for child in children]
                 max_heuristic = max(children_heuristics)
-                possible_moves = [i for i,c in enumerate(children_heuristics) if c == max_heuristic]
+                possible_moves = [i for i, c in enumerate(children_heuristics) if c == max_heuristic]
                 operator = operators[random.choice(possible_moves)]
                 D += 1
 
@@ -124,8 +152,9 @@ class AgentAlphaBeta(AgentMinimax):
                 for child, op in zip(children, operators):
                     child.apply_operator(agent_id, op)
                 other_id = (agent_id + 1) % 2
-                children_heuristics = [self.RB_AlphaBeta(child, agent_id, D, turn=other_id, alpha=-math.inf, beta=math.inf)
-                                       for child in children]
+                children_heuristics = [
+                    self.RB_AlphaBeta(child, agent_id, D, turn=other_id, alpha=-math.inf, beta=math.inf)
+                    for child in children]
                 max_heuristic = max(children_heuristics)
                 index_selected = children_heuristics.index(max_heuristic)
                 operator = operators[index_selected]
