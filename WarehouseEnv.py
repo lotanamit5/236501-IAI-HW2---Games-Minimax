@@ -5,6 +5,7 @@ import pygame
 board_size = 5
 import time
 
+
 def manhattan_distance(p0, p1):
     return abs(p0[0] - p1[0]) + abs(p0[1] - p1[1])
 
@@ -180,7 +181,8 @@ class WarehouseEnv(object):
                 robot = self.get_robot_in(p)
                 package = self.get_package_in(p)
                 charge_station = self.get_charge_station_in(p)
-                package_destination = [package for package in self.packages[0:2] if package.destination == p and package.on_board]
+                package_destination = [package for package in self.packages[0:2] if
+                                       package.destination == p and package.on_board]
                 robot_package_destination = [i for i, robot in enumerate(self.robots) if robot.package is not None
                                              and robot.package.destination == p]
                 if robot:
@@ -261,8 +263,6 @@ class WarehouseEnv(object):
             self.dest_red = pygame.image.load("icons/dest_red.jpeg").convert()
             self.dest_blue = pygame.image.load("icons/dest_blue.jpeg").convert()
 
-
-
         canvas = pygame.Surface((720, 720))
         canvas.fill((255, 255, 255))
 
@@ -299,7 +299,8 @@ class WarehouseEnv(object):
                 robot = self.get_robot_in(p)
                 package = self.get_package_in(p)
                 charge_station = self.get_charge_station_in(p)
-                package_destination = [package for package in self.packages if package.destination == p and package.on_board]
+                package_destination = [package for package in self.packages if
+                                       package.destination == p and package.on_board]
                 robot_package_destination = [i for i, robot in enumerate(self.robots) if
                                              robot.package is not None
                                              and robot.package.destination == p]
@@ -314,7 +315,7 @@ class WarehouseEnv(object):
                     else:
                         if robot.package is not None:
                             canvas.blit(pygame.transform.scale(self.red_robot_package_icon, (95, 95)),
-                                    (x * 100 + 112, y * 100 + 192))
+                                        (x * 100 + 112, y * 100 + 192))
                         else:
                             canvas.blit(pygame.transform.scale(self.red_robot_icon, (95, 95)),
                                         (x * 100 + 112, y * 100 + 192))
@@ -345,9 +346,7 @@ class WarehouseEnv(object):
                         canvas.blit(pygame.transform.scale(self.dest_red, (80, 80)),
                                     (x * 100 + 120, y * 100 + 200))
 
-
-
         self.window.blit(canvas, (0, 0))
         pygame.display.update()
         self.clock.tick(5)
-        # time.sleep(1)
+        time.sleep(0.1)

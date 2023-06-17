@@ -38,5 +38,3 @@ class AgentGreedy(Agent):
         max_heuristic = max(children_heuristics)
         index_selected = children_heuristics.index(max_heuristic)
         return operators[index_selected]
-
-
